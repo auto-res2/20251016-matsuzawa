@@ -1,0 +1,123 @@
+
+Input:
+You are an AI research assistant tasked with generating Hydra configuration files for experiment runs.
+
+# Task
+Generate individual YAML configuration files for each experiment run. These configs will be used by Hydra to configure specific experimental variations.
+
+# Input Information
+
+## Research Method
+We compare lightweight model architectures (MobileNetV2-0.5 and DistilBERT-base) across vision and language tasks to evaluate their efficiency and performance trade-offs.
+
+## Experimental Design
+{'experiment_summary': 'Comparative analysis of efficient model architectures across vision and language tasks', 'evaluation_metrics': ['accuracy', 'f1_score', 'inference_time', 'model_size'], 'proposed_method': 'Evaluate MobileNetV2 and DistilBERT variants for efficient deployment', 'comparative_methods': ['MobileNetV2-0.5 (3.5M parameters)', 'DistilBERT-base (66M parameters)'], 'models_to_use': ['MobileNetV2-0.5-3.5M', 'DistilBERT-base-66M'], 'datasets_to_use': ['CIFAR-10', 'alpaca-cleaned'], 'hyperparameters_to_search': None, 'external_resources': None, 'experiment_code': None}
+
+## Experiment Runs
+
+- Run ID: comparative-2-MobileNetV2-0.5-3.5M-CIFAR-10
+  Method: comparative-2
+  Model: MobileNetV2-0.5-3.5M
+  Dataset: CIFAR-10
+
+- Run ID: comparative-2-MobileNetV2-0.5-3.5M-alpaca-cleaned
+  Method: comparative-2
+  Model: MobileNetV2-0.5-3.5M
+  Dataset: alpaca-cleaned
+
+- Run ID: comparative-2-DistilBERT-base-66M-CIFAR-10
+  Method: comparative-2
+  Model: DistilBERT-base-66M
+  Dataset: CIFAR-10
+
+- Run ID: comparative-2-DistilBERT-base-66M-alpaca-cleaned
+  Method: comparative-2
+  Model: DistilBERT-base-66M
+  Dataset: alpaca-cleaned
+
+
+# Requirements
+
+## Configuration Structure
+Each run configuration should include:
+- run_id: Unique identifier for this run
+- method: The method name (baseline, proposed, ablation, etc.)
+- model: Model-specific parameters (name, architecture details, hyperparameters)
+- dataset: Dataset-specific parameters (name, preprocessing settings, split ratios)
+- training: Training hyperparameters (learning rate, batch size, epochs, optimizer settings)
+- optuna: Hyperparameter search space definition for Optuna optimization
+  - Define search spaces for key hyperparameters using Optuna's suggest methods
+  - Example: learning_rate: [1e-5, 1e-3], batch_size: [16, 32, 64]
+- Any other experiment-specific settings
+
+## Format
+- Generate one YAML configuration per experiment run
+- Ensure valid YAML syntax
+- Use meaningful parameter values based on the research method and experimental design
+
+## Example Configuration
+```yaml
+run_id: baseline_bert_imdb
+method: baseline
+model:
+  name: bert-base-uncased
+  hidden_size: 768
+  num_layers: 12
+dataset:
+  name: imdb
+  max_length: 512
+  batch_size: 32
+training:
+  learning_rate: 2e-5
+  epochs: 3
+  optimizer: adamw
+  warmup_steps: 500
+optuna:
+  n_trials: 20
+  search_space:
+    learning_rate:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    batch_size:
+      type: categorical
+      choices: [16, 32, 64]
+```
+
+# Experimental Environment
+cpu
+RAM：500 MB
+
+# Instructions
+1. Generate one YAML configuration for each experiment run listed above
+2. Ensure configurations reflect the differences between baseline, proposed, and ablation methods
+3. Use appropriate hyperparameters based on the experimental design
+4. Include Optuna search space if hyperparameter optimization is beneficial for the experiment
+5. For Optuna search spaces, use appropriate distribution types:
+   - loguniform: For learning rates, regularization parameters
+   - uniform: For dropout rates, weight decay
+   - int: For hidden dimensions, number of layers
+   - categorical: For discrete choices like batch size, optimizer type
+
+Generate the configurations now:
+Output:
+{
+  "run_configs": [
+    {
+      "run_id": "comparative-2-MobileNetV2-0.5-3.5M-CIFAR-10",
+      "run_config_yaml": "run_id: comparative-2-MobileNetV2-0.5-3.5M-CIFAR-10\nmethod: comparative-2\nmodel:\n  name: MobileNetV2\n  width_multiplier: 0.5\n  parameters: 3.5M\n  pretrained: false\n  dropout: 0.2\ndataset:\n  name: CIFAR-10\n  image_size: 32\n  normalization:\n    mean: [0.4914, 0.4822, 0.4465]\n    std: [0.2023, 0.1994, 0.2010]\n  augmentations: [random_crop, horizontal_flip]\n  train_split: 0.9\n  val_split: 0.1\n  batch_size: 128\ntraining:\n  epochs: 200\n  learning_rate: 0.01\n  optimizer: sgd\n  momentum: 0.9\n  weight_decay: 0.0005\n  lr_scheduler: cosine\noptuna:\n  n_trials: 50\n  search_space:\n    learning_rate:\n      type: loguniform\n      low: 1e-4\n      high: 1e-1\n    weight_decay:\n      type: loguniform\n      low: 1e-6\n      high: 1e-3\n    batch_size:\n      type: categorical\n      choices: [64, 128, 256]\n    dropout:\n      type: uniform\n      low: 0.0\n      high: 0.5\n"
+    },
+    {
+      "run_id": "comparative-2-MobileNetV2-0.5-3.5M-alpaca-cleaned",
+      "run_config_yaml": "run_id: comparative-2-MobileNetV2-0.5-3.5M-alpaca-cleaned\nmethod: comparative-2\nmodel:\n  name: MobileNetV2\n  width_multiplier: 0.5\n  parameters: 3.5M\n  input_channels: 1\n  pretrained: false\n  dropout: 0.2\ndataset:\n  name: alpaca-cleaned\n  task: instruction-following\n  tokenization: char\n  vocab_size: 128\n  max_length: 256\n  padding: max_length\n  train_split: 0.9\n  val_split: 0.1\n  batch_size: 32\ntraining:\n  epochs: 10\n  learning_rate: 0.001\n  optimizer: adam\n  weight_decay: 0.0001\n  lr_scheduler: linear\noptuna:\n  n_trials: 25\n  search_space:\n    learning_rate:\n      type: loguniform\n      low: 1e-5\n      high: 1e-2\n    weight_decay:\n      type: loguniform\n      low: 1e-6\n      high: 1e-3\n    batch_size:\n      type: categorical\n      choices: [16, 32, 64]\n    dropout:\n      type: uniform\n      low: 0.0\n      high: 0.5\n"
+    },
+    {
+      "run_id": "comparative-2-DistilBERT-base-66M-CIFAR-10",
+      "run_config_yaml": "run_id: comparative-2-DistilBERT-base-66M-CIFAR-10\nmethod: comparative-2\nmodel:\n  name: DistilBERT-base\n  parameters: 66M\n  hidden_size: 768\n  num_layers: 6\n  patch_embedding: true\n  image_patch_size: 4\n  seq_length: 64\ndataset:\n  name: CIFAR-10\n  image_size: 32\n  patch_size: 4\n  normalization:\n    mean: [0.4914, 0.4822, 0.4465]\n    std: [0.2023, 0.1994, 0.2010]\n  train_split: 0.9\n  val_split: 0.1\n  batch_size: 64\ntraining:\n  epochs: 30\n  learning_rate: 5e-5\n  optimizer: adamw\n  weight_decay: 0.0001\n  warmup_steps: 500\n  lr_scheduler: linear\noptuna:\n  n_trials: 40\n  search_space:\n    learning_rate:\n      type: loguniform\n      low: 1e-5\n      high: 1e-3\n    weight_decay:\n      type: loguniform\n      low: 1e-6\n      high: 1e-3\n    batch_size:\n      type: categorical\n      choices: [32, 64, 128]\n    warmup_steps:\n      type: int\n      low: 100\n      high: 1000\n"
+    },
+    {
+      "run_id": "comparative-2-DistilBERT-base-66M-alpaca-cleaned",
+      "run_config_yaml": "run_id: comparative-2-DistilBERT-base-66M-alpaca-cleaned\nmethod: comparative-2\nmodel:\n  name: DistilBERT-base\n  parameters: 66M\n  hidden_size: 768\n  num_layers: 6\n  dropout: 0.1\n  max_position_embeddings: 512\ndataset:\n  name: alpaca-cleaned\n  task: instruction-following\n  tokenizer: huggingface/llama\n  max_length: 256\n  padding: max_length\n  train_split: 0.9\n  val_split: 0.1\n  batch_size: 16\ntraining:\n  epochs: 3\n  learning_rate: 3e-5\n  optimizer: adamw\n  weight_decay: 0.01\n  warmup_steps: 500\n  lr_scheduler: linear\noptuna:\n  n_trials: 40\n  search_space:\n    learning_rate:\n      type: loguniform\n      low: 1e-5\n      high: 1e-3\n    batch_size:\n      type: categorical\n      choices: [8, 16, 32]\n    weight_decay:\n      type: loguniform\n      low: 1e-6\n      high: 1e-1\n    dropout:\n      type: uniform\n      low: 0.0\n      high: 0.3\n    warmup_steps:\n      type: int\n      low: 0\n      high: 1000\n"
+    }
+  ]
+}
