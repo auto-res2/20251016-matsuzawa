@@ -1,0 +1,61 @@
+run_id: proposed-DistilBERT-base-66M-CIFAR-10
+method: proposed
+model:
+  name: distilbert-base-66M
+  hidden_size: 768
+  num_layers: 6
+  adapter:
+    enabled: true
+    adapter_size: 64
+    non_linearity: relu
+  freeze_base_model: true
+  classification_head:
+    num_labels: 10
+    dropout: 0.1
+dataset:
+  name: cifar10
+  num_classes: 10
+  image_size: 32
+  patch_size: 4
+  augmentation:
+    random_flip: true
+    random_crop: true
+  splits:
+    train: 0.9
+    val: 0.05
+    test: 0.05
+  batch_size: 64
+training:
+  learning_rate: 5e-4
+  epochs: 10
+  optimizer: adamw
+  weight_decay: 0.01
+  lr_scheduler: linear
+  warmup_ratio: 0.1
+  gradient_accumulation_steps: 1
+  mixed_precision: false
+optuna:
+  n_trials: 30
+  direction: maximize
+  timeout: 3600
+  search_space:
+    learning_rate:
+      type: loguniform
+      low: 1e-5
+      high: 1e-3
+    batch_size:
+      type: categorical
+      choices: [32, 64, 128]
+    adapter_size:
+      type: int
+      low: 16
+      high: 128
+    weight_decay:
+      type: uniform
+      low: 0.0
+      high: 0.1
+metrics:
+  - accuracy
+  - f1_score
+  - inference_time
+device: cpu

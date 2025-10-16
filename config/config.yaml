@@ -1,0 +1,16 @@
+defaults:
+  - _self_
+  - run: proposed-DistilBERT-base-66M-CIFAR-10
+
+# ---------------------------------------------------------------------------
+# Global defaults (overridable via CLI or run YAMLs)
+# ---------------------------------------------------------------------------
+run_id: default_run
+method: baseline
+results_dir: outputs
+trial_mode: false
+
+wandb:
+  entity: gengaru617
+  project: 251016-test
+  mode: online
