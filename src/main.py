@@ -12,13 +12,28 @@ def main(cfg: DictConfig):
     repo_root = hydra.utils.get_original_cwd()
     os.chdir(repo_root)
 
+    # Flatten run config into root level
+    from omegaconf import OmegaConf
+    OmegaConf.set_struct(cfg, False)
+    if "run" in cfg:
+        cfg = OmegaConf.merge(cfg, cfg.run)
+
+    # Extract the run config name from command line args
+    run_config = None
+    for arg in sys.argv:
+        if arg.startswith("run="):
+            run_config = arg.split("=", 1)[1]
+            break
+    if not run_config:
+        run_config = cfg.get("run_id", "default_run")
+
     # --------------------------- Train -----------------------------------
     train_cmd = [
         sys.executable,
         "-u",
         "-m",
         "src.train",
-        f"run={cfg.run_id}",
+        f"run={run_config}",
         f"results_dir={cfg.results_dir}",
         f"wandb.mode={cfg.wandb.mode}",
     ]
@@ -32,7 +47,7 @@ def main(cfg: DictConfig):
         "-u",
         "-m",
         "src.evaluate",
-        f"run={cfg.run_id}",
+        f"run={run_config}",
         f"results_dir={cfg.results_dir}",
         f"wandb.mode={cfg.wandb.mode}",
     ]
@@ -40,7 +55,7 @@ def main(cfg: DictConfig):
         eval_cmd.append("trial_mode=true")
     subprocess.run(eval_cmd, check=True)
 
-    print(json.dumps({"workflow": "completed", "run_id": cfg.run_id}))
+    print(json.dumps({"workflow": "completed", "run_id": cfg.get("run_id", run_config)}))
 
 if __name__ == "__main__":
     repo_root = Path(__file__).resolve().parents[1]

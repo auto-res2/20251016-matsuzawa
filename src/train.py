@@ -231,9 +231,15 @@ def build_objective(base_cfg: DictConfig, trial_mode: bool):
 def main(cfg: DictConfig):
     # Ensure path is repository root regardless of Hydra's CWD change
     os.chdir(get_original_cwd())
+    
+    # Flatten run config into root level
+    OmegaConf.set_struct(cfg, False)
+    if "run" in cfg:
+        cfg = OmegaConf.merge(cfg, cfg.run)
 
+    run_id = cfg.get("run_id", "default_run")
     results_dir = os.path.abspath(cfg.results_dir)
-    run_dir = os.path.join(results_dir, f"run_{cfg.run_id}")
+    run_dir = os.path.join(results_dir, f"run_{run_id}")
     Path(run_dir).mkdir(parents=True, exist_ok=True)
 
     trial_mode = bool(cfg.trial_mode)
@@ -254,10 +260,10 @@ def main(cfg: DictConfig):
             project=cfg.wandb.project,
             config=OmegaConf.to_container(cfg, resolve=True),
             mode=cfg.wandb.mode,
-            name=cfg.run_id,
+            name=run_id,
         )
         # Immediately print URL so that CI workflow can capture it.
-        print(json.dumps({"run_id": cfg.run_id, "wandb_url": wb_run.url}))
+        print(json.dumps({"run_id": run_id, "wandb_url": wb_run.url}))
 
     # ---------------------- Training --------------------------------------
     final_metrics, history = run_training(cfg, trial_mode, use_wandb)
@@ -278,7 +284,7 @@ def main(cfg: DictConfig):
 
     # ---------------------- Persist results -------------------------------
     result_payload = {
-        "run_id": cfg.run_id,
+        "run_id": run_id,
         "method_name": cfg.method,
         "model_name": cfg.model.name,
         "dataset_name": cfg.dataset.name,
@@ -296,7 +302,7 @@ def main(cfg: DictConfig):
     save_json(os.path.join(run_dir, "results.json"), result_payload)
 
     # ---------------------- Console summary -------------------------------
-    summary_out = {"run_id": cfg.run_id, **final_metrics, "wandb_url": wb_run.url if wb_run else None}
+    summary_out = {"run_id": run_id, **final_metrics, "wandb_url": wb_run.url if wb_run else None}
     print(json.dumps(summary_out))
 
 

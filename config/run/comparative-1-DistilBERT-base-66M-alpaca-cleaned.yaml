@@ -1,7 +1,7 @@
 run_id: comparative-1-DistilBERT-base-66M-alpaca-cleaned
 method: comparative-1
 model:
-  name: distilbert-base-66M
+  name: distilbert/distilbert-base-uncased
   hidden_size: 768
   num_layers: 6
   adapter:

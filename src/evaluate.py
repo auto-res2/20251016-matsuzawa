@@ -38,8 +38,19 @@ def baseline_lookup(runs: List[Dict]) -> Dict[str, Dict]:
 
 @hydra.main(config_path="../config", config_name="config")
 def main(cfg: DictConfig):
+    # Flatten run config into root level
+    from omegaconf import OmegaConf
+    from hydra.utils import get_original_cwd
+    
+    # Ensure we're in the repository root
+    os.chdir(get_original_cwd())
+    
+    OmegaConf.set_struct(cfg, False)
+    if "run" in cfg:
+        cfg = OmegaConf.merge(cfg, cfg.run)
+    
     results_dir = os.path.abspath(cfg.results_dir)
-    run_id = cfg.run_id
+    run_id = cfg.get("run_id", "default_run")
     trial_mode = bool(cfg.trial_mode)
 
     # ----------------------- Select runs -----------------------------------
